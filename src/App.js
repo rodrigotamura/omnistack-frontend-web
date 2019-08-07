@@ -1,25 +1,29 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Routes from './routes';
+
+/**
+ * Para passar um valor para um componente, é só adicionar o nome da propriedade
+ * neste caso testePropriedade='Olá' dentro do componente Routes, e dentro do componente
+ * Routes utilizar:
+ * export default function Routes(props) {
+        return (
+            <h1>{props.testePropriedade}</h1>
+        );
+    }
+
+    ou usar a desestruturação:
+   
+    export default function Routes({ testePropriedade }) {
+        return (
+            <h1>{testePropriedade}</h1>
+        );
+    }
+ */
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes />
   );
 }
 
