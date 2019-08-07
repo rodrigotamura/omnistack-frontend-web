@@ -3,9 +3,9 @@
  */
 import React, { useState } from 'react';
 import './Login.css';
+import api from '../services/api';
 
 import logo from '../assets/logo.svg'; // para imagens estáticas, que fazem parte do layoput, temos que importar
-import { isContainer } from 'postcss-selector-parser';
 
 export default function Login({ history }) {
     // inicializa com o valor vazio
@@ -13,12 +13,19 @@ export default function Login({ history }) {
     // se eu quiser acessar o valor de username, chamo username
     const [username, setUsername] = useState('');
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault(); // bloqueia redirecionamento
 
-        
+        const response = await api.post('/devs', {
+            // dados do corpo
+            username
+        });
 
-        history.push('/main'); // aqui ele vai redirecionar para a rota /main
+        const { _id } = response.data;
+
+
+
+        history.push(`/dev/${_id}`); // aqui ele vai redirecionar para a rota /main
     }
 
     return (
