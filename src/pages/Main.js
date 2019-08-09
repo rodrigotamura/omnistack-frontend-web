@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'; // para link
+import io from 'socket.io-client';
 
 import api from '../services/api';
 
 import logo from '../assets/logo.svg';
 import like from '../assets/like.svg';
 import deslike from '../assets/dislike.svg';
+import itsamatch from '../assets/itsamatch.png';
 
 import './Main.css';
 
 export default function Main({ match }) {
     const [ users, setUsers ] = useState([]);// inicia com array vazio pois iremos acrescentar vários usuários
+    const [ matchDev, setMatchDev ] = useState(false); // essa variável vai ficar sendo escutada
 
     /**
      * useEffect() irá fazer com que a função (1º parâmetro) seja executado
@@ -28,6 +31,8 @@ export default function Main({ match }) {
          * As boas práticas do React diz que não se pode adicionar async/await
          * diretamente em useEffect(), por isso vamos adicionar outra função
          * que possamos adicionar o async/await
+         * 
+         * Esse useEffect está fazendo uma chamada API
          */
         async function loadUsers(){
             const response = await api.get('/devs', { 
@@ -42,6 +47,42 @@ export default function Main({ match }) {
 
         loadUsers();
      }, [match.params.id]);
+
+    // interessante separar o useEffect por funcionalidade. Mas funcionaria se aproveitássemos o de cima
+    useEffect(() => {
+        /**
+         * Esse useEffect está fazendo a chamada ao WebSocket
+         */
+        const socket = io(  // estabelendo conexão
+            'http://localhost:3333', // onde está o API
+            {// este segundo parâmetro seriam os dados que passaríamos a mais
+                query: { user: match.params.id }
+            }
+            );
+
+            // ouvindo emit do tipo 'match' do servidor
+            socket.on('match', dev => {
+                console.log(dev);
+                setMatchDev(dev);
+            });
+
+        /* TESTES PARA CONHECER O BÁSICO DO WEBSOCKET LADO CLIENT
+        setTimeout(() => {
+            socket.emit(
+                'hello',  // emitindo uma mensagem ao servidor do tipo 'hello'
+                { // neste segundo parametro podemos enviar qualquer outra coisa, um objeto por exemplo
+                    message: 'Hello World'
+                }
+            );
+        }, 3000);
+
+        // Recebendo mensagem do API do tipo 'world'
+        socket.on('world', message => {
+            console.log(message);
+        })
+        */
+
+    }, [match.params.id]);
 
     async function handleLike(id) {
         await api.post(`/devs/${id}/likes`, null, {
@@ -90,6 +131,18 @@ export default function Main({ match }) {
                     <div className="empty">Acabou :(</div>
                 ) }
             </ul>
+            {console.log(matchDev)}
+            {matchDev && (
+                <div className="match-container">
+                    <img src={itsamatch} alt="It's a match!" />
+
+                    <img src={matchDev.avatar} className="avatar" alt="" />
+                    <strong>{matchDev.name}</strong>
+                    <p>{matchDev.bio}</p>
+
+                    <button type="button" onClick={() => setMatchDev(null)}>FECHAR</button>
+                </div>
+            )}
         </div>
     )
 }
